@@ -85,11 +85,17 @@ st.markdown(f"""
 
 col_tc, col_vs, col_mt = st.columns([5, 1, 5])
 
+tc_leading = tc_pnl > martan_pnl
+mt_leading = martan_pnl > tc_pnl
+tc_badge = "<div class='lead-badge gold'>★ Leading</div>" if tc_leading else ""
+mt_badge = "<div class='lead-badge blue'>★ Leading</div>" if mt_leading else ""
+
 with col_tc:
     tc_col  = WIN_GREEN if tc_pnl >= 0 else LOSS_RED
     tc_sign = "+" if tc_pnl >= 0 else ""
     st.markdown(f"""
-    <div class='score-box tc-box'>
+    <div class='score-box tc-box{" leading" if tc_leading else ""}'>
+      {tc_badge}
       <div class='score-label' style='color:{TC_GOLD};'>TC Capital</div>
       <div class='score-name' style='color:{TC_GOLD};'>The Base System</div>
       <div class='score-pnl' style='color:{tc_col};'>${tc_sign}{tc_pnl:.2f}</div>
@@ -102,8 +108,8 @@ with col_tc:
 
 with col_vs:
     st.markdown("""
-    <div class='vs-box' style='height:100%; min-height:160px;'>
-      <div class='vs-text'>VS</div>
+    <div class='vs-box' style='height:100%; min-height:170px;'>
+      <div class='vs-circle'>VS</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -111,7 +117,8 @@ with col_mt:
     mt_col  = WIN_GREEN if martan_pnl >= 0 else LOSS_RED
     mt_sign = "+" if martan_pnl >= 0 else ""
     st.markdown(f"""
-    <div class='score-box martan-box'>
+    <div class='score-box martan-box{" leading" if mt_leading else ""}'>
+      {mt_badge}
       <div class='score-label' style='color:{MARTAN_BLUE};'>Martan Trading</div>
       <div class='score-name' style='color:{MARTAN_BLUE};'>The Upgraded System</div>
       <div class='score-pnl' style='color:{mt_col};'>${mt_sign}{martan_pnl:.2f}</div>
@@ -135,16 +142,20 @@ fig = go.Figure()
 if not tc_comp.empty:
     fig.add_trace(go.Scatter(
         x=tc_comp["exit_date"], y=tc_comp["pnl_usd"].cumsum(),
-        name="TC Capital", line=dict(color=TC_GOLD, width=2.5),
+        name="TC Capital",
+        line=dict(color=TC_GOLD, width=2.6, shape="spline", smoothing=0.6),
         mode="lines+markers", marker=dict(size=5, color=TC_GOLD),
+        fill="tozeroy", fillcolor="rgba(201,168,76,0.07)",
         hovertemplate="<b>TC Capital</b><br>%{x}<br>P&L: $%{y:+.2f}<extra></extra>",
     ))
 
 if not martan_comp.empty:
     fig.add_trace(go.Scatter(
         x=martan_comp["exit_date"], y=martan_comp["pnl_usd"].cumsum(),
-        name="Martan Trading", line=dict(color=MARTAN_BLUE, width=2.5),
+        name="Martan Trading",
+        line=dict(color=MARTAN_BLUE, width=2.6, shape="spline", smoothing=0.6),
         mode="lines+markers", marker=dict(size=5, color=MARTAN_BLUE),
+        fill="tozeroy", fillcolor="rgba(77,184,255,0.07)",
         hovertemplate="<b>Martan Trading</b><br>%{x}<br>P&L: $%{y:+.2f}<extra></extra>",
     ))
 
@@ -295,11 +306,11 @@ def render_recent_trades(trades, colour, name):
         reason  = str(row.get("exit_reason", ""))
         date    = str(row.get("exit_date", ""))[:16]
         direct  = str(row.get("direction", ""))
-        dir_col = WIN_GREEN if direct == "BUY" else LOSS_RED
+        pill    = "buy" if direct == "BUY" else "sell"
         st.markdown(f"""
         <div class='trade-row' style='border-left: 3px solid {col};'>
           <span style='color:#5A8CAA;'>{date}</span>
-          <span style='color:{dir_col};'>{direct}</span>
+          <span class='dir-pill {pill}'>{direct}</span>
           <span style='color:#C0D0E0;'>{inst} U{unit}</span>
           <span style='color:#5A8CAA; font-size:0.65rem;'>{reason}</span>
           <span style='color:{col}; font-weight:600;'>${sign}{pnl:.2f}</span>

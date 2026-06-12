@@ -33,33 +33,158 @@ LOSS_RED    = "#EF4444"
 
 CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600&display=swap');
+
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-.stApp { background-color: #080E1C; color: #F0EDE6; }
+
+.stApp {
+  background:
+    radial-gradient(ellipse 70% 45% at 15% -5%, rgba(201,168,76,0.10), transparent),
+    radial-gradient(ellipse 70% 45% at 85% -5%, rgba(77,184,255,0.10), transparent),
+    linear-gradient(180deg, #0A1322 0%, #070D18 60%, #060B14 100%);
+  color: #F0EDE6;
+}
+header[data-testid="stHeader"] { background: transparent; }
+#MainMenu, footer { visibility: hidden; }
+
 h1, h2, h3 { font-family: 'Playfair Display', serif !important; }
-[data-testid="stSidebar"] { background-color: #0B1426; }
+
+/* ---- sidebar ---- */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, #0C1628 0%, #091120 100%);
+  border-right: 1px solid #16283F;
+}
 [data-testid="stSidebar"] * { color: #C0D0E0; }
-[data-testid="metric-container"] { background: #0F1A2E; border: 1px solid #1E3A5F; border-radius: 8px; padding: 12px; }
-[data-testid="stMetricValue"] { font-family: 'Playfair Display', serif !important; font-weight: 700 !important; font-size: 1.3rem !important; }
-[data-testid="stMetricLabel"] { font-size: 0.65rem !important; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Mono', monospace !important; color: #6A8CAA !important; }
-::-webkit-scrollbar { width: 4px; }
+[data-testid="stSidebarNav"] a {
+  border-radius: 8px; margin: 2px 8px; transition: background .15s;
+}
+[data-testid="stSidebarNav"] a:hover { background: rgba(42,79,122,0.30); }
+[data-testid="stSidebarNav"] span { font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 0.04em; }
+
+/* ---- metric tiles ---- */
+[data-testid="metric-container"], div[data-testid="stMetric"] {
+  background: linear-gradient(160deg, #101C32 0%, #0B1424 100%);
+  border: 1px solid #1E3A5F; border-radius: 14px; padding: 14px 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+[data-testid="stMetricValue"] { font-family: 'Playfair Display', serif !important; font-weight: 700 !important; font-size: 1.35rem !important; }
+[data-testid="stMetricLabel"] { font-size: 0.62rem !important; text-transform: uppercase; letter-spacing: 0.12em; font-family: 'DM Mono', monospace !important; color: #6A8CAA !important; }
+
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: #080E1C; }
 ::-webkit-scrollbar-thumb { background: #2A4F7A; border-radius: 3px; }
-.score-box { border-radius: 12px; padding: 28px 24px; text-align: center; }
-.tc-box { background: linear-gradient(135deg, #0D1830 0%, #141F3A 100%); border: 2px solid #C9A84C; }
-.martan-box { background: linear-gradient(135deg, #0A1628 0%, #0F1E35 100%); border: 2px solid #4DB8FF; }
-.score-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px; }
-.score-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; }
-.score-pnl { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 800; line-height: 1; }
-.score-zar { font-family: 'DM Mono', monospace; font-size: 1rem; margin-top: 6px; opacity: 0.7; }
+
+/* ---- score cards ---- */
+.score-box { border-radius: 18px; padding: 32px 24px 26px; text-align: center; position: relative;
+  backdrop-filter: blur(6px); transition: box-shadow .3s; }
+.tc-box {
+  background: linear-gradient(150deg, rgba(201,168,76,0.10) 0%, rgba(13,24,48,0.92) 45%), #0D1830;
+  border: 1px solid rgba(201,168,76,0.50);
+  box-shadow: 0 0 26px rgba(201,168,76,0.10), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.martan-box {
+  background: linear-gradient(150deg, rgba(77,184,255,0.10) 0%, rgba(10,22,40,0.92) 45%), #0A1628;
+  border: 1px solid rgba(77,184,255,0.50);
+  box-shadow: 0 0 26px rgba(77,184,255,0.10), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.score-box.leading.tc-box  { border-color: #C9A84C; box-shadow: 0 0 46px rgba(201,168,76,0.30), inset 0 1px 0 rgba(255,255,255,0.06); }
+.score-box.leading.martan-box { border-color: #4DB8FF; box-shadow: 0 0 46px rgba(77,184,255,0.30), inset 0 1px 0 rgba(255,255,255,0.06); }
+.lead-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  padding: 3px 16px; border-radius: 999px; font-family: 'DM Mono', monospace;
+  font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+.lead-badge.gold { background: linear-gradient(90deg, #8A6D2F, #C9A84C, #E8CD7E); color: #0B1426; box-shadow: 0 2px 12px rgba(201,168,76,0.45); }
+.lead-badge.blue { background: linear-gradient(90deg, #2A7CB0, #4DB8FF, #9CDBFF); color: #06121F; box-shadow: 0 2px 12px rgba(77,184,255,0.45); }
+
+.score-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 6px; }
+.score-name { font-family: 'Playfair Display', serif; font-size: 1.55rem; font-weight: 700; margin-bottom: 14px; }
+.score-pnl { font-family: 'Playfair Display', serif; font-size: 3.1rem; font-weight: 800; line-height: 1; text-shadow: 0 2px 18px rgba(0,0,0,0.45); }
+.score-zar { font-family: 'DM Mono', monospace; font-size: 0.95rem; margin-top: 8px; opacity: 0.65; }
+
+/* ---- VS circle ---- */
 .vs-box { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.vs-text { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: #3A4F6A; }
-.leader-banner { border-radius: 8px; padding: 10px 20px; text-align: center; font-family: 'DM Mono', monospace; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; }
-.metric-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1A2A40; font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+.vs-circle {
+  width: 62px; height: 62px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 32% 28%, #16283F, #0B1426);
+  border: 1px solid #243F5F;
+  font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 800; color: #6A8CAA;
+  box-shadow: 0 0 22px rgba(90,140,200,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* ---- leader banner ---- */
+.leader-banner {
+  border-radius: 999px; padding: 10px 24px; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 0.78rem; letter-spacing: 0.12em;
+  text-transform: uppercase; margin: 4px auto 22px; max-width: 560px;
+  animation: bannerpulse 3.2s ease-in-out infinite;
+}
+@keyframes bannerpulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.22); }
+}
+
+/* ---- stats table ---- */
+.metric-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 14px; border-radius: 9px; margin-bottom: 2px;
+  font-family: 'DM Mono', monospace; font-size: 0.78rem;
+  border-bottom: 1px solid #14233A; transition: background .15s;
+}
+.metric-row:hover { background: rgba(30,58,95,0.28); }
 .metric-name { color: #5A8CAA; }
-.section-header { font-family: 'DM Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: #3A5A7A; margin: 20px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #1A2A40; }
-.trade-row { background: #0D1625; border-radius: 6px; padding: 8px 12px; margin-bottom: 4px; font-family: 'DM Mono', monospace; font-size: 0.72rem; display: flex; justify-content: space-between; }
-.timer-text { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: #3A5A7A; text-align: center; margin-bottom: 20px; }
+
+.section-header {
+  font-family: 'DM Mono', monospace; font-size: 0.64rem; text-transform: uppercase;
+  letter-spacing: 0.18em; color: #4A6E92; margin: 26px 0 10px 0; padding-bottom: 6px;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, #2A4F7A 0%, rgba(42,79,122,0) 70%) 1;
+}
+
+/* ---- trade rows ---- */
+.trade-row {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  background: linear-gradient(90deg, #0E1828 0%, #0C1422 100%);
+  border: 1px solid #15263E; border-radius: 10px;
+  padding: 8px 14px; margin-bottom: 6px;
+  font-family: 'DM Mono', monospace; font-size: 0.72rem;
+  transition: transform .12s, border-color .12s;
+}
+.trade-row:hover { transform: translateX(3px); border-color: #2A4F7A; }
+.dir-pill {
+  padding: 2px 11px; border-radius: 999px; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
+}
+.dir-pill.buy  { background: rgba(16,185,129,0.14); color: #10B981; border: 1px solid rgba(16,185,129,0.40); }
+.dir-pill.sell { background: rgba(239,68,68,0.14);  color: #EF4444; border: 1px solid rgba(239,68,68,0.40); }
+
+.timer-text { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: #3A5A7A; text-align: center; margin-bottom: 20px; }
+
+/* ---- password gate ---- */
+.pw-card {
+  max-width: 420px; margin: 8vh auto 0; padding: 42px 36px 34px;
+  border-radius: 18px; text-align: center;
+  background: linear-gradient(160deg, #0F1B32 0%, #0A1322 100%);
+  border: 1px solid #1E3A5F;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.pw-emblem { font-size: 2.2rem; margin-bottom: 10px; }
+.pw-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 800; color: #E8E2D4; margin-bottom: 4px; }
+.pw-sub { font-family: 'DM Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.16em; color: #4A6E92; }
+[data-testid="stTextInput"] input {
+  background: #0B1426 !important; border: 1px solid #1E3A5F !important; border-radius: 10px !important;
+  color: #F0EDE6 !important; font-family: 'DM Mono', monospace !important; text-align: center;
+}
+[data-testid="stTextInput"] input:focus { border-color: #C9A84C !important; box-shadow: 0 0 0 1px #C9A84C33 !important; }
+
+/* ---- mobile ---- */
+@media (max-width: 640px) {
+  .score-pnl { font-size: 2.1rem; }
+  .score-name { font-size: 1.15rem; }
+  .score-box { padding: 24px 14px 20px; }
+  .leader-banner { font-size: 0.66rem; padding: 8px 14px; }
+}
 </style>
 """
 
@@ -73,17 +198,16 @@ def require_password():
     if st.session_state.get("auth_ok"):
         return
     st.markdown("""
-    <div style='text-align:center; margin-top:80px; margin-bottom:8px;'>
-      <span style='font-family:"Playfair Display",serif; font-size:1.8rem; font-weight:800; color:#C0D0E0;'>
-        ⚔&nbsp; TC Capital vs Martan Trading &nbsp;⚔
-      </span>
+    <div class='pw-card'>
+      <div class='pw-emblem'>⚔</div>
+      <div class='pw-title'>TC Capital&nbsp;vs&nbsp;Martan Trading</div>
+      <div class='pw-sub'>Private scoreboard — enter password</div>
     </div>
-    <div class='timer-text'>Private — enter the password to view</div>
     """, unsafe_allow_html=True)
-    _, mid, _ = st.columns([2, 1, 2])
+    _, mid, _ = st.columns([2, 1.6, 2])
     with mid:
         entered = st.text_input("Password", type="password", label_visibility="collapsed",
-                                placeholder="Password")
+                                placeholder="••••••••")
         if entered:
             if hmac.compare_digest(entered, pw):
                 st.session_state["auth_ok"] = True
@@ -325,7 +449,7 @@ def render_bot_page(system, name, accent, tagline):
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=closed["exit_date"], y=closed["pnl_usd"].cumsum(),
-            name=name, line=dict(color=accent, width=2.5),
+            name=name, line=dict(color=accent, width=2.6, shape="spline", smoothing=0.6),
             mode="lines", fill="tozeroy",
             fillcolor=f"rgba({int(accent[1:3],16)},{int(accent[3:5],16)},{int(accent[5:7],16)},0.08)",
             hovertemplate="%{x}<br>P&L: $%{y:+.2f}<extra></extra>",
@@ -395,11 +519,11 @@ def render_bot_page(system, name, accent, tagline):
             reason  = str(row.get("exit_reason", ""))
             date    = str(row.get("exit_date", ""))[:16]
             direct  = str(row.get("direction", ""))
-            dir_col = WIN_GREEN if direct == "BUY" else LOSS_RED
+            pill    = "buy" if direct == "BUY" else "sell"
             st.markdown(f"""
             <div class='trade-row' style='border-left: 3px solid {col};'>
               <span style='color:#5A8CAA;'>{date}</span>
-              <span style='color:{dir_col};'>{direct}</span>
+              <span class='dir-pill {pill}'>{direct}</span>
               <span style='color:#C0D0E0;'>{inst} U{unit}</span>
               <span style='color:#5A8CAA; font-size:0.65rem;'>{reason}</span>
               <span style='color:{col}; font-weight:600;'>${sign}{pnl:.2f}</span>
