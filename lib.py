@@ -9,6 +9,7 @@ Dual-mode data loading:
 =============================================================
 """
 
+import hmac
 import os
 import io
 import glob
@@ -63,9 +64,39 @@ h1, h2, h3 { font-family: 'Playfair Display', serif !important; }
 """
 
 
+def require_password():
+    """Password gate. Active only when APP_PASSWORD is set in secrets,
+    so local use (no secrets file) is never blocked."""
+    pw = _secret("APP_PASSWORD")
+    if not pw:
+        return
+    if st.session_state.get("auth_ok"):
+        return
+    st.markdown("""
+    <div style='text-align:center; margin-top:80px; margin-bottom:8px;'>
+      <span style='font-family:"Playfair Display",serif; font-size:1.8rem; font-weight:800; color:#C0D0E0;'>
+        ⚔&nbsp; TC Capital vs Martan Trading &nbsp;⚔
+      </span>
+    </div>
+    <div class='timer-text'>Private — enter the password to view</div>
+    """, unsafe_allow_html=True)
+    _, mid, _ = st.columns([2, 1, 2])
+    with mid:
+        entered = st.text_input("Password", type="password", label_visibility="collapsed",
+                                placeholder="Password")
+        if entered:
+            if hmac.compare_digest(entered, pw):
+                st.session_state["auth_ok"] = True
+                st.rerun()
+            else:
+                st.error("Incorrect password")
+    st.stop()
+
+
 def page_setup(title, icon):
     st.set_page_config(page_title=title, page_icon=icon, layout="wide")
     st.markdown(CSS, unsafe_allow_html=True)
+    require_password()
 
 
 def is_local():
