@@ -29,15 +29,11 @@ lib.page_setup("TC vs Martan — Scoreboard", "⚔")
 tc_raw     = lib.load_journals("tc")
 martan_raw = lib.load_journals("martan")
 
-tc_all      = lib.get_closed_trades(tc_raw)
-martan_all  = lib.get_closed_trades(martan_raw)
 tc_comp     = lib.get_closed_trades(tc_raw,     since=COMPETITION_START)
 martan_comp = lib.get_closed_trades(martan_raw, since=COMPETITION_START)
 
-tc_m         = lib.calc_metrics(tc_comp)
-martan_m     = lib.calc_metrics(martan_comp)
-tc_all_m     = lib.calc_metrics(tc_all)
-martan_all_m = lib.calc_metrics(martan_all)
+tc_m     = lib.calc_metrics(tc_comp)
+martan_m = lib.calc_metrics(martan_comp)
 
 # =============================================================
 # HEADER
@@ -136,7 +132,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 # CUMULATIVE P&L CHART
 # =============================================================
 
-st.markdown("<div class='section-header'>Cumulative P&L — Competition Period</div>", unsafe_allow_html=True)
+st.markdown("<div class='section-header'>Cumulative P&L — Since 1 June 2026</div>", unsafe_allow_html=True)
 
 fig = go.Figure()
 
@@ -187,7 +183,7 @@ else:
 # METRICS TABLE
 # =============================================================
 
-st.markdown("<div class='section-header'>Head-to-Head Stats — Competition Period</div>",
+st.markdown("<div class='section-header'>Head-to-Head Stats — Since 1 June 2026</div>",
             unsafe_allow_html=True)
 
 def metric_row(label, tc_val, mt_val, tc_better_fn=None, fmt_fn=str):
@@ -347,7 +343,7 @@ else:
 # PER-INSTRUMENT BREAKDOWN
 # =============================================================
 
-st.markdown("<div class='section-header'>P&L by Instrument — Competition Period</div>",
+st.markdown("<div class='section-header'>P&L by Instrument — Since 1 June 2026</div>",
             unsafe_allow_html=True)
 
 all_instruments = sorted(set(
@@ -430,21 +426,6 @@ with col_l:
     render_recent_trades(tc_comp, TC_GOLD, "TC Capital")
 with col_r:
     render_recent_trades(martan_comp, MARTAN_BLUE, "Martan Trading")
-
-# =============================================================
-# ALL-TIME CONTEXT
-# =============================================================
-
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<div class='section-header'>All-Time Context</div>", unsafe_allow_html=True)
-
-c1, c2, c3, c4, c5, c6 = st.columns(6)
-c1.metric("TC All-Time P&L",       fmt_pnl(tc_all_m["total_pnl_usd"]))
-c2.metric("TC Setup Win Rate",     f"{tc_all_m['setup_win_rate']:.0f}%")
-c3.metric("TC Total Setups",       str(tc_all_m["setups"]))
-c4.metric("Martan All-Time P&L",   fmt_pnl(martan_all_m["total_pnl_usd"]))
-c5.metric("Martan Setup Win Rate", f"{martan_all_m['setup_win_rate']:.0f}%")
-c6.metric("Martan Total Setups",   str(martan_all_m["setups"]))
 
 # =============================================================
 # AUTO REFRESH (sleep + rerun — script tags don't run in st.markdown)

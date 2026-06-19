@@ -435,10 +435,8 @@ def render_bot_page(system, name, accent, tagline):
 
     raw        = load_journals(system)
     portfolios = load_portfolios(system)
-    closed     = get_closed_trades(raw)
-    comp       = get_closed_trades(raw, since=COMPETITION_START)
-    m_all      = calc_metrics(closed)
-    m_comp     = calc_metrics(comp)
+    closed     = get_closed_trades(raw, since=COMPETITION_START)
+    m          = calc_metrics(closed)
 
     capital  = sum(p.get("capital_usd", 0) for p in portfolios.values())
     starting = sum(p.get("starting_capital", 0) for p in portfolios.values())
@@ -458,16 +456,16 @@ def render_bot_page(system, name, accent, tagline):
 
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     cap_delta = capital - starting
-    c1.metric("Total Capital",     f"${capital:,.2f}", fmt_pnl(cap_delta))
-    c2.metric("Competition P&L",   fmt_pnl(m_comp["total_pnl_usd"]))
-    c3.metric("All-Time P&L",      fmt_pnl(m_all["total_pnl_usd"]))
-    c4.metric("Setup Win Rate",    f"{m_comp['setup_win_rate']:.0f}%",
-              f"{m_comp['setups']} setups")
-    c5.metric("Profit Factor",     fmt_pf(m_comp["profit_factor"]))
-    c6.metric("Open Positions",    str(len(open_trades)))
+    c1.metric("Total Capital",  f"${capital:,.2f}", fmt_pnl(cap_delta))
+    c2.metric("P&L (from 1 Jun)", fmt_pnl(m["total_pnl_usd"]))
+    c3.metric("Total Setups",   str(m["setups"]))
+    c4.metric("Setup Win Rate", f"{m['setup_win_rate']:.0f}%",
+              f"{m['setups']} setups")
+    c5.metric("Profit Factor",  fmt_pf(m["profit_factor"]))
+    c6.metric("Open Positions", str(len(open_trades)))
 
     # ---- Equity curve ----
-    st.markdown("<div class='section-header'>Cumulative P&L — All Time</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>Cumulative P&L — Since 1 June 2026</div>", unsafe_allow_html=True)
     if not closed.empty:
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -496,14 +494,12 @@ def render_bot_page(system, name, accent, tagline):
     for inst in sorted(portfolios.keys()):
         p = portfolios[inst]
         inst_closed = closed[closed["instrument_key"] == inst] if not closed.empty else pd.DataFrame()
-        inst_comp   = comp[comp["instrument_key"] == inst] if not comp.empty else pd.DataFrame()
         rows.append({
-            "Instrument":      p.get("name", inst.upper()),
-            "Capital":         round(p.get("capital_usd", 0), 2),
-            "All-Time P&L":    round(float(inst_closed["pnl_usd"].sum()) if not inst_closed.empty else 0.0, 2),
-            "Competition P&L": round(float(inst_comp["pnl_usd"].sum()) if not inst_comp.empty else 0.0, 2),
-            "Unit Exits":      len(inst_closed),
-            "Open Units":      len(p.get("open_trades", [])),
+            "Instrument": p.get("name", inst.upper()),
+            "Capital":    round(p.get("capital_usd", 0), 2),
+            "P&L":        round(float(inst_closed["pnl_usd"].sum()) if not inst_closed.empty else 0.0, 2),
+            "Unit Exits": len(inst_closed),
+            "Open Units": len(p.get("open_trades", [])),
         })
     if rows:
         df_inst = pd.DataFrame(rows)
@@ -511,9 +507,8 @@ def render_bot_page(system, name, accent, tagline):
             df_inst,
             use_container_width=True, hide_index=True,
             column_config={
-                "Capital":         st.column_config.NumberColumn(format="$%.2f"),
-                "All-Time P&L":    st.column_config.NumberColumn(format="$%.2f"),
-                "Competition P&L": st.column_config.NumberColumn(format="$%.2f"),
+                "Capital": st.column_config.NumberColumn(format="$%.2f"),
+                "P&L":     st.column_config.NumberColumn(format="$%.2f"),
             },
         )
 
@@ -530,7 +525,7 @@ def render_bot_page(system, name, accent, tagline):
                     unsafe_allow_html=True)
 
     # ---- Recent trades ----
-    st.markdown("<div class='section-header'>Recent Closed Trades</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>Recent Closed Trades — Since 1 June</div>", unsafe_allow_html=True)
     if not closed.empty:
         recent = closed.sort_values("exit_date", ascending=False).head(12)
         for _, row in recent.iterrows():
