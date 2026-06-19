@@ -18,7 +18,7 @@ import streamlit as st
 import pandas as pd
 import requests
 
-COMPETITION_START = "2026-05-26"
+COMPETITION_START = "2026-06-01"
 
 LOCAL_FOLDERS = {
     "tc":     r"C:\Users\Cloudius\OneDrive\Documents\TC_Capital\tc_capital_data\trades",
@@ -390,6 +390,17 @@ def calc_metrics(trades):
         "setup_wins":     setup_wins,
         "setup_win_rate": setup_wins / setups * 100 if setups else 0.0,
     }
+
+
+def weekly_pnl(df):
+    """Return weekly P&L grouped by ISO week (Mon–Sun). Uses exit_date."""
+    if df.empty:
+        return pd.DataFrame(columns=["week_start", "pnl"])
+    d = df.copy()
+    d["exit_date"] = pd.to_datetime(d["exit_date"], errors="coerce")
+    d = d.dropna(subset=["exit_date"])
+    d["week_start"] = d["exit_date"].dt.to_period("W").apply(lambda p: p.start_time.date())
+    return d.groupby("week_start")["pnl_usd"].sum().reset_index().rename(columns={"pnl_usd": "pnl"})
 
 
 def fmt_pnl(v, prefix="$"):

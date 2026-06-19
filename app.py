@@ -10,10 +10,11 @@ Cloud:  deploy this folder's repo on share.streamlit.io
 """
 
 import time
-from datetime import datetime
+from datetime import datetime, date
 
 import streamlit as st
 import plotly.graph_objects as go
+import pandas as pd
 
 import lib
 from lib import (COMPETITION_START, TC_GOLD, MARTAN_BLUE, WIN_GREEN, LOSS_RED,
@@ -233,6 +234,114 @@ metric_row("Worst Trade",        tc_m["worst"],           martan_m["worst"],
            higher_is_better, lambda v: fmt_pnl(v))
 metric_row("Max Drawdown",       tc_m["max_dd"],          martan_m["max_dd"],
            higher_is_better, lambda v: fmt_pnl(v))
+
+# =============================================================
+# WEEKLY P&L BREAKDOWN
+# =============================================================
+
+st.markdown("<div class='section-header'>Weekly P&L — Competition Period</div>",
+            unsafe_allow_html=True)
+
+tc_weekly     = lib.weekly_pnl(tc_comp)
+martan_weekly = lib.weekly_pnl(martan_comp)
+
+all_weeks = sorted(set(
+    list(tc_weekly["week_start"]) + list(martan_weekly["week_start"])
+))
+
+if all_weeks:
+    tc_w   = dict(zip(tc_weekly["week_start"],     tc_weekly["pnl"]))
+    mart_w = dict(zip(martan_weekly["week_start"], martan_weekly["pnl"]))
+
+    week_labels, tc_vals_w, mart_vals_w = [], [], []
+    table_rows = []
+    for ws in all_weeks:
+        we      = ws + pd.Timedelta(days=6)
+        lbl     = f"{ws.strftime('%d %b')} – {we.strftime('%d %b')}"
+        tc_v    = tc_w.get(ws, 0.0)
+        mart_v  = mart_w.get(ws, 0.0)
+        week_labels.append(lbl)
+        tc_vals_w.append(tc_v)
+        mart_vals_w.append(mart_v)
+        if tc_v > mart_v:
+            winner = f"<span style='color:{TC_GOLD};'>TC Capital</span>"
+        elif mart_v > tc_v:
+            winner = f"<span style='color:{MARTAN_BLUE};'>Martan</span>"
+        else:
+            winner = "<span style='color:#6A8CAA;'>Draw</span>"
+        table_rows.append((lbl, tc_v, mart_v, winner))
+
+    # Grouped bar chart
+    fig_w = go.Figure()
+    fig_w.add_trace(go.Bar(
+        x=week_labels, y=tc_vals_w, name="TC Capital",
+        marker_color=[WIN_GREEN if v >= 0 else LOSS_RED for v in tc_vals_w],
+        marker_line_color=TC_GOLD, marker_line_width=1.2, opacity=0.88,
+    ))
+    fig_w.add_trace(go.Bar(
+        x=week_labels, y=mart_vals_w, name="Martan Trading",
+        marker_color=[WIN_GREEN if v >= 0 else LOSS_RED for v in mart_vals_w],
+        marker_line_color=MARTAN_BLUE, marker_line_width=1.2, opacity=0.70,
+    ))
+    fig_w.add_hline(y=0, line_dash="dot", line_color="#2A3A50", line_width=1)
+    fig_w.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#080E1C",
+        font=dict(family="DM Mono, monospace", color="#5A8CAA", size=11),
+        xaxis=dict(gridcolor="#1A2A3A", linecolor="#1A2A3A"),
+        yaxis=dict(gridcolor="#1A2A3A", linecolor="#1A2A3A",
+                   tickprefix="$", tickformat=".2f"),
+        margin=dict(l=10, r=10, t=20, b=10),
+        barmode="group", bargap=0.22, bargroupgap=0.08,
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=11, color="#8AAAC0"),
+                    orientation="h", y=-0.22),
+        height=260,
+    )
+    st.plotly_chart(fig_w, use_container_width=True)
+
+    # Weekly table
+    header = (
+        "<div class='metric-row' style='border-bottom:1px solid #1E3A5F; margin-bottom:4px;'>"
+        f"<span style='color:#4A6E92; width:36%; text-align:left;'>WEEK</span>"
+        f"<span style='color:{TC_GOLD}; width:22%; text-align:right;'>TC CAPITAL</span>"
+        f"<span style='color:{MARTAN_BLUE}; width:22%; text-align:right;'>MARTAN</span>"
+        f"<span style='color:#4A6E92; width:20%; text-align:center;'>WINNER</span>"
+        "</div>"
+    )
+    st.markdown(header, unsafe_allow_html=True)
+    for lbl, tc_v, mart_v, winner in table_rows:
+        tc_col   = WIN_GREEN if tc_v   >= 0 else LOSS_RED
+        mart_col = WIN_GREEN if mart_v >= 0 else LOSS_RED
+        st.markdown(f"""
+        <div class='metric-row'>
+          <span style='color:#5A8CAA; width:36%; text-align:left;'>{lbl}</span>
+          <span style='color:{tc_col}; width:22%; text-align:right; font-weight:600;'>{fmt_pnl(tc_v)}</span>
+          <span style='color:{mart_col}; width:22%; text-align:right; font-weight:600;'>{fmt_pnl(mart_v)}</span>
+          <span style='width:20%; text-align:center;'>{winner}</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Weekly totals row
+    tc_tot   = sum(tc_vals_w)
+    mart_tot = sum(mart_vals_w)
+    tc_tot_c   = WIN_GREEN if tc_tot   >= 0 else LOSS_RED
+    mart_tot_c = WIN_GREEN if mart_tot >= 0 else LOSS_RED
+    if tc_tot > mart_tot:
+        tot_winner = f"<span style='color:{TC_GOLD}; font-weight:700;'>TC Capital</span>"
+    elif mart_tot > tc_tot:
+        tot_winner = f"<span style='color:{MARTAN_BLUE}; font-weight:700;'>Martan</span>"
+    else:
+        tot_winner = "<span style='color:#6A8CAA;'>Draw</span>"
+    st.markdown(f"""
+    <div class='metric-row' style='border-top:1px solid #1E3A5F; margin-top:4px; background:rgba(20,35,60,0.4);'>
+      <span style='color:#C0D0E0; width:36%; text-align:left; font-weight:700; letter-spacing:0.06em;'>TOTAL</span>
+      <span style='color:{tc_tot_c}; width:22%; text-align:right; font-weight:700;'>{fmt_pnl(tc_tot)}</span>
+      <span style='color:{mart_tot_c}; width:22%; text-align:right; font-weight:700;'>{fmt_pnl(mart_tot)}</span>
+      <span style='width:20%; text-align:center;'>{tot_winner}</span>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("<div style='text-align:center; padding:30px; font-family:\"DM Mono\",monospace; font-size:0.8rem; color:#3A5A7A;'>No trades yet in competition period</div>",
+                unsafe_allow_html=True)
 
 # =============================================================
 # PER-INSTRUMENT BREAKDOWN
