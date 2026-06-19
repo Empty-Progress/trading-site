@@ -179,11 +179,23 @@ h1, h2, h3 { font-family: 'Playfair Display', serif !important; }
 [data-testid="stTextInput"] input:focus { border-color: #C9A84C !important; box-shadow: 0 0 0 1px #C9A84C33 !important; }
 
 /* ---- mobile ---- */
-@media (max-width: 640px) {
-  .score-pnl { font-size: 2.1rem; }
-  .score-name { font-size: 1.15rem; }
-  .score-box { padding: 24px 14px 20px; }
-  .leader-banner { font-size: 0.66rem; padding: 8px 14px; }
+@media (max-width: 768px) {
+  .score-pnl  { font-size: 2rem; }
+  .score-name { font-size: 1.05rem; }
+  .score-box  { padding: 20px 12px 16px; min-width: unset; }
+  .score-meta { font-size: 0.72rem; }
+  .lead-badge { font-size: 0.58rem; padding: 3px 10px; top: -12px; }
+  .leader-banner { font-size: 0.62rem; padding: 7px 12px; letter-spacing: 0.06em; }
+  .vs-circle  { width: 52px; height: 52px; font-size: 1rem; margin: 12px auto; }
+  .dir-pill   { font-size: 0.6rem; padding: 1px 6px; }
+  .trade-row  { font-size: 0.72rem; padding: 6px 8px; flex-wrap: wrap; gap: 4px; }
+  .context-tile { padding: 10px 8px; }
+  .context-val  { font-size: 1.2rem; }
+  .context-lbl  { font-size: 0.65rem; }
+  /* prevent horizontal scroll on tables */
+  [data-testid="stDataFrame"], [data-testid="stTable"] { overflow-x: auto; font-size: 0.72rem; }
+  /* stack Plotly charts properly */
+  [data-testid="stPlotlyChart"] { margin: 0 -8px; }
 }
 </style>
 """
